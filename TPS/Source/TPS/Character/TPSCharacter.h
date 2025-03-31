@@ -32,6 +32,7 @@ public:
 private:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
+	void Input_Run(const FInputActionValue& InputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -46,10 +47,20 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> TurnAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> RunAction;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UCameraComponent> Camera;
+
+protected:
+	UPROPERTY(EditAnywhere, Category = PlayerStat)
+	float WalkSpeed = 200.0f;
+
+	UPROPERTY(EditAnywhere, Category = PlayerStat)
+	float RunSpeed = 600.0f;
 };

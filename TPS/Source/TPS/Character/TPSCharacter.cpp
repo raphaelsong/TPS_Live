@@ -3,6 +3,7 @@
 
 #include "Character/TPSCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
@@ -55,6 +56,12 @@ ATPSCharacter::ATPSCharacter()
 	{
 		TurnAction = TurnActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> RunActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Run.IA_Run'"));
+	if (RunActionRef.Succeeded())
+	{
+		RunAction = RunActionRef.Object;
+	}
 #pragma endregion
 
 }
@@ -64,6 +71,8 @@ void ATPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 	{
@@ -95,6 +104,7 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Move);
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Turn);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Run);
 	}
 }
 
@@ -116,5 +126,19 @@ void ATPSCharacter::Input_Turn(const FInputActionValue& InputValue)
 {
 	float XValue = InputValue.Get<float>();
 	AddControllerYawInput(XValue);
+}
+
+void ATPSCharacter::Input_Run(const FInputActionValue& InputValue)
+{
+	bool IsRun = InputValue.Get<bool>();
+
+	if (IsRun)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
 }
 
