@@ -33,6 +33,7 @@ private:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
 	void Input_Run(const FInputActionValue& InputValue);
+	void Input_Fire(const FInputActionValue& InputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -49,6 +50,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> RunAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> FireAction;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
