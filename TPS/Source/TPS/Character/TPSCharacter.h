@@ -28,6 +28,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+// Weapon System
+public:
+	void AttachWeapon(TSubclassOf<class AWeapon> NewWeapon);
+
+protected:
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	TSubclassOf<class AWeapon> WeaponClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class AWeapon> EquipWeapon;
+
 // Input System
 private:
 	void Input_Move(const FInputActionValue& InputValue);

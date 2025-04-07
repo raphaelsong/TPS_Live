@@ -9,6 +9,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/TPSAnimInstance.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Weapon/Weapon.h"
 
 // Sets default values
 ATPSCharacter::ATPSCharacter()
@@ -32,6 +34,12 @@ ATPSCharacter::ATPSCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	static ConstructorHelpers::FClassFinder<AWeapon> WeaponClassRef(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/BP_Weapon.BP_Weapon_C'"));
+	if (WeaponClassRef.Succeeded())
+	{
+		WeaponClass = WeaponClassRef.Class;
+	}
 
 #pragma region InputSystems
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMCDefaultRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
@@ -78,6 +86,8 @@ void ATPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AttachWeapon(WeaponClass);
+
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -113,6 +123,21 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Turn);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Run);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Fire);
+	}
+}
+
+void ATPSCharacter::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
+{
+	if (NewWeapon)
+	{
+		EquipWeapon = GetWorld()->SpawnActor<AWeapon>(NewWeapon);
+
+		const USkeletalMeshSocket* WeaponSocket = GetMesh()->GetSocketByName("WeaponSocket");
+
+		if (EquipWeapon && WeaponSocket)
+		{
+			WeaponSocket->AttachActor(EquipWeapon, GetMesh());
+		}
 	}
 }
 
