@@ -31,6 +31,10 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
+	UPROPERTY(EditAnywhere, Category = HitEffect)
+	TObjectPtr<class UParticleSystem> HitEffect;
+
+protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class USphereComponent> SphereCollision;
 
