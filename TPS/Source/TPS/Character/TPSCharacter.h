@@ -28,6 +28,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+// Reload
+public:
+	void StartReloading();
+	void FinishReloading();
+
 // Weapon System
 public:
 	void AttachWeapon(TSubclassOf<class AWeapon> NewWeapon);
@@ -45,6 +50,7 @@ private:
 	void Input_Turn(const FInputActionValue& InputValue);
 	void Input_Run(const FInputActionValue& InputValue);
 	void Input_Fire(const FInputActionValue& InputValue);
+	void Input_Reload(const FInputActionValue& InputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -65,6 +71,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> FireAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> ReloadAction;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
@@ -78,4 +87,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = PlayerStat)
 	float RunSpeed = 600.0f;
+
+	UPROPERTY(EditAnywhere, Category = Reload)
+	bool bIsReload = false;
 };

@@ -4,6 +4,7 @@
 #include "Animation/TPSAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/TPSCharacter.h"
 
 UTPSAnimInstance::UTPSAnimInstance()
 {
@@ -12,13 +13,19 @@ UTPSAnimInstance::UTPSAnimInstance()
 	{
 		FireMontage = FireMontageRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ReloadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/AM_Rifle_Reload.AM_Rifle_Reload'"));
+	if (ReloadMontageRef.Succeeded())
+	{
+		ReloadMontage = ReloadMontageRef.Object;
+	}
 }
 
 void UTPSAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	Character = Cast<ACharacter>(TryGetPawnOwner());
+	Character = Cast<ATPSCharacter>(TryGetPawnOwner());
 
 	if (Character)
 	{
@@ -51,4 +58,18 @@ void UTPSAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UTPSAnimInstance::PlayFireMontage()
 {
 	Montage_Play(FireMontage);
+}
+
+void UTPSAnimInstance::PlayReloadMontage()
+{
+	Montage_Play(ReloadMontage);
+	Montage_GetEndedDelegate(ReloadMontage)->BindUObject(this, &UTPSAnimInstance::FinishReloading);
+}
+
+void UTPSAnimInstance::FinishReloading(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Character)
+	{
+		Character->FinishReloading();
+	}
 }

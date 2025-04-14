@@ -56,6 +56,8 @@ void AWeapon::Reloading()
 
 void AWeapon::FinishReloading()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, TEXT("Reload"));
+	AmmoRemainCount = AmmoMaxCount;
 }
 
 void AWeapon::PlayHitEffect(FTransform HitTransform)

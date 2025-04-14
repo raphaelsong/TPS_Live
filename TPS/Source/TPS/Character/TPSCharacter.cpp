@@ -77,6 +77,12 @@ ATPSCharacter::ATPSCharacter()
 	{
 		FireAction = FireActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> ReloadActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Reload.IA_Reload'"));
+	if (ReloadActionRef.Succeeded())
+	{
+		ReloadAction = ReloadActionRef.Object;
+	}
 #pragma endregion
 
 }
@@ -123,7 +129,40 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Turn);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Run);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Fire);
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Reload);
 	}
+}
+
+void ATPSCharacter::StartReloading()
+{
+	if (bIsReload == true)
+		return;
+
+	UTPSAnimInstance* AnimInstnace = Cast<UTPSAnimInstance>(GetMesh()->GetAnimInstance());
+	if (nullptr == AnimInstnace)
+		return;
+
+	if (nullptr == EquipWeapon)
+		return;
+
+	bIsReload = true;
+	EquipWeapon->StopFire();
+	EquipWeapon->Reloading();
+	AnimInstnace->PlayReloadMontage();
+}
+
+void ATPSCharacter::FinishReloading()
+{
+	UTPSAnimInstance* AnimInstnace = Cast<UTPSAnimInstance>(GetMesh()->GetAnimInstance());
+	if (nullptr == AnimInstnace)
+		return;
+
+	if (nullptr == EquipWeapon)
+		return;
+
+	bIsReload = false;
+	EquipWeapon->FinishReloading();
+	AnimInstnace->StopAllMontages(false);
 }
 
 void ATPSCharacter::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
@@ -177,6 +216,9 @@ void ATPSCharacter::Input_Run(const FInputActionValue& InputValue)
 
 void ATPSCharacter::Input_Fire(const FInputActionValue& InputValue)
 {
+	if (bIsReload == true)
+		return;
+
 	if (EquipWeapon == nullptr)
 		return;
 
@@ -196,5 +238,10 @@ void ATPSCharacter::Input_Fire(const FInputActionValue& InputValue)
 		EquipWeapon->StopFire();
 		AnimInstance->StopAllMontages(false);
 	}
+}
+
+void ATPSCharacter::Input_Reload(const FInputActionValue& InputValue)
+{
+	StartReloading();
 }
 

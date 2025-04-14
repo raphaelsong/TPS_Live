@@ -23,16 +23,22 @@ public:
 
 public:
 	void PlayFireMontage();
+	void PlayReloadMontage();
+
+	void FinishReloading(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<class ACharacter> Character;
+	TObjectPtr<class ATPSCharacter> Character;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<class UCharacterMovementComponent> MovementComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UAnimMontage> FireMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UAnimMontage> ReloadMontage;
 	
 protected:
 	UPROPERTY(BlueprintReadOnly)
