@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
+#include "Engine/DamageEvents.h"
 
 ABullet::ABullet()
 {
@@ -72,6 +73,13 @@ void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 	if (HitCharacter)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("HitCharacter"));
+
+		ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+		if (OwnerCharacter == nullptr)
+			return;
+
+		FDamageEvent DamageEvent;
+		HitCharacter->TakeDamage(AttackDamage, DamageEvent, OwnerCharacter->GetController(), OwnerCharacter);
 	}
 
 	FTransform HitTransform;

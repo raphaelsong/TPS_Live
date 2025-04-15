@@ -5,11 +5,12 @@
 #include "Character/TPSCharacter.h"
 #include "Bullet.h"
 #include "GameFramework/Character.h"
+#include "Engine/DamageEvents.h"
 
 AWeaponRifle::AWeaponRifle()
 {
 	Bullet = ABullet::StaticClass();
-	FireType = EFireType::EF_LineTrace;
+	FireType = EFireType::EF_Projectile;
 }
 
 void AWeaponRifle::StartFire(TWeakObjectPtr<class ATPSCharacter> OwnerCharacter)
@@ -83,6 +84,8 @@ void AWeaponRifle::FireWithProjectile(TWeakObjectPtr<class ATPSCharacter> OwnerC
 	{
 		SpawnBullet->SetActorLocation(Start);
 		SpawnBullet->SetActorRotation(Direction.Rotation());
+		SpawnBullet->SetOwner(Character);
+		SpawnBullet->SetAttackDamage(AttackDamage);
 
 		if (Direction.Normalize())
 		{
@@ -129,6 +132,9 @@ void AWeaponRifle::FireWithLineTrace(TWeakObjectPtr<class ATPSCharacter> OwnerCh
 		if (HitCharacter)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("LineTraceHit"));
+
+			FDamageEvent DamageEvent;
+			HitCharacter->TakeDamage(AttackDamage, DamageEvent, Character->GetController(), Character);
 		}
 
 		FTransform HitTransform;
