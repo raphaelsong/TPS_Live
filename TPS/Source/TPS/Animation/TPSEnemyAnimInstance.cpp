@@ -13,6 +13,12 @@ UTPSEnemyAnimInstance::UTPSEnemyAnimInstance()
 	{
 		HitMontage = HitMontageRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AttackMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/AM_EnemyAttack.AM_EnemyAttack'"));
+	if (AttackMontageRef.Succeeded())
+	{
+		AttackMontage = AttackMontageRef.Object;
+	}
 }
 
 void UTPSEnemyAnimInstance::NativeInitializeAnimation()
@@ -54,4 +60,15 @@ void UTPSEnemyAnimInstance::PlayDeadMontage()
 	FString SectionName = TEXT("Dead");
 	Montage_Play(HitMontage);
 	Montage_JumpToSection(*SectionName);
+}
+
+void UTPSEnemyAnimInstance::PlayAttackMontage()
+{
+	Montage_Play(AttackMontage);
+	Montage_GetEndedDelegate(AttackMontage)->BindUObject(this, &UTPSEnemyAnimInstance::FinishAttackMontage);
+}
+
+void UTPSEnemyAnimInstance::FinishAttackMontage(UAnimMontage* Montage, bool bInterrupted)
+{
+	OnAttackFinished.Broadcast();
 }

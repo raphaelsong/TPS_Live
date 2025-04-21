@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Animation/TPSEnemyAnimInstance.h"
 #include "AI/EnemyAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ATPSEnemy::ATPSEnemy()
@@ -16,6 +17,7 @@ ATPSEnemy::ATPSEnemy()
 	AIControllerClass = AEnemyAIController::StaticClass();
 
 	GetCapsuleComponent()->SetCollisionProfileName("TPSEnemy");
+	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/_Art/Enemy/Model/vampire_a_lusth.vampire_a_lusth'"));
 	
@@ -34,6 +36,12 @@ void ATPSEnemy::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHp = MaxHp;
+
+	UTPSEnemyAnimInstance* AnimInstance = Cast<UTPSEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->OnAttackFinished.AddUObject(this, &ATPSEnemy::AttackEnded);
+	}
 }
 
 // Called every frame
@@ -95,5 +103,18 @@ void ATPSEnemy::SetDead()
 		}
 		),
 		5.0f, false);
+}
+
+void ATPSEnemy::Attack()
+{
+	UTPSEnemyAnimInstance* EnemyAnimInstance = Cast<UTPSEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (EnemyAnimInstance)
+	{
+		EnemyAnimInstance->PlayAttackMontage();
+	}
+}
+
+void ATPSEnemy::AttackEnded()
+{
 }
 

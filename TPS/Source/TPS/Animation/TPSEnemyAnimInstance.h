@@ -6,6 +6,8 @@
 #include "Animation/AnimInstance.h"
 #include "TPSEnemyAnimInstance.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnEnemyAttackFinished);
+
 /**
  * 
  */
@@ -24,10 +26,18 @@ public:
 public:
 	void PlayHitMontage();
 	void PlayDeadMontage();
+	void PlayAttackMontage();
+	void FinishAttackMontage(UAnimMontage* Montage, bool bInterrupted);
+
+public:
+	FOnEnemyAttackFinished OnAttackFinished;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage)
 	TObjectPtr<class UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage)
+	TObjectPtr<class UAnimMontage> AttackMontage;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

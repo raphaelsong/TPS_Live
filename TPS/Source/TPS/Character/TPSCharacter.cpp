@@ -11,12 +11,15 @@
 #include "Animation/TPSAnimInstance.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Weapon/Weapon.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ATPSCharacter::ATPSCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	GetCapsuleComponent()->SetCollisionProfileName("TPSPlayer");
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> FindMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/_Art/MilitaryCharDark/MW_Style2_Male.MW_Style2_Male'"));
 
