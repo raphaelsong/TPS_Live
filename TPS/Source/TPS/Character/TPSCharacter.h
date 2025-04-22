@@ -28,6 +28,20 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+// Stat System
+public:
+	void SetHp(float NewHp);
+	void SetDead();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurrentHp = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHp = 100.0f;
+
 // Reload
 public:
 	void StartReloading();

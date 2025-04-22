@@ -95,6 +95,8 @@ void ATPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SetHp(MaxHp);
+
 	AttachWeapon(WeaponClass);
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -134,6 +136,31 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Fire);
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Reload);
 	}
+}
+
+float ATPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	SetHp(CurrentHp - DamageAmount);
+
+	if (CurrentHp <= KINDA_SMALL_NUMBER)
+	{
+		SetDead();
+	}
+	
+	return DamageAmount;
+}
+
+void ATPSCharacter::SetHp(float NewHp)
+{
+	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, MaxHp);
+}
+
+void ATPSCharacter::SetDead()
+{
+	SetActorEnableCollision(false);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
 void ATPSCharacter::StartReloading()

@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/TPSAttackInterface.h"
 #include "TPSEnemy.generated.h"
 
 UCLASS()
-class TPS_API ATPSEnemy : public ACharacter
+class TPS_API ATPSEnemy : public ACharacter, public ITPSAttackInterface
 {
 	GENERATED_BODY()
 
@@ -29,10 +30,14 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
+	void SetHp(float NewHp);
 	void SetDamage();
 	void SetDead();
 	void Attack();
 	void AttackEnded();
+	
+	// Inherited via ITPSAttackInterface
+	void AttackHitCheck() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = Stat)

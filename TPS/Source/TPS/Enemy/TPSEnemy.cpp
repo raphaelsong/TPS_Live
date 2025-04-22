@@ -6,6 +6,7 @@
 #include "Animation/TPSEnemyAnimInstance.h"
 #include "AI/EnemyAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 ATPSEnemy::ATPSEnemy()
@@ -35,7 +36,7 @@ void ATPSEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	CurrentHp = MaxHp;
+	SetHp(MaxHp);
 
 	UTPSEnemyAnimInstance* AnimInstance = Cast<UTPSEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
@@ -62,8 +63,9 @@ float ATPSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	CurrentHp -= DamageAmount;
-	if (CurrentHp <= 0)
+	SetHp(CurrentHp - DamageAmount);
+
+	if (CurrentHp <= KINDA_SMALL_NUMBER)
 	{
 		SetDead();
 	}
@@ -73,6 +75,11 @@ float ATPSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	}
 
 	return DamageAmount;
+}
+
+void ATPSEnemy::SetHp(float NewHp)
+{
+	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, MaxHp);
 }
 
 void ATPSEnemy::SetDamage()
@@ -86,6 +93,12 @@ void ATPSEnemy::SetDamage()
 
 void ATPSEnemy::SetDead()
 {
+	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+	if (AIController)
+	{
+		AIController->StopAI();
+	}
+
 	UTPSEnemyAnimInstance* AnimInstance = Cast<UTPSEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
@@ -116,5 +129,38 @@ void ATPSEnemy::Attack()
 
 void ATPSEnemy::AttackEnded()
 {
+}
+
+void ATPSEnemy::AttackHitCheck()
+{
+	FHitResult OutHitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	const float AttackRange = 80.0f;
+	const float AttackRadius = 50.0f;
+	const float AttackDamage = 30.0f;
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, ECollisionChannel::ECC_GameTraceChannel3, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+	if (HitDetected)
+	{
+		ACharacter* HitCharacter = Cast<ACharacter>(OutHitResult.GetActor());
+		if (HitCharacter)
+		{
+			FDamageEvent DamageEvent;
+			HitCharacter->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+		}
+	}
+
+#if ENABLE_DRAW_DEBUG
+	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+	float CapsuleHalfHeight = AttackRange * 0.5f;
+	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+#endif
 }
 
