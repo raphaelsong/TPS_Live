@@ -36,6 +36,9 @@ public:
 	FORCEINLINE float GetReloadingDelayTime() { return ReloadingDelayTime; }
 
 public:
+	void SetAmmoRemainCount(int32 NewAmmoRemainCount);
+
+public:
 	virtual void StartFire(TWeakObjectPtr<class ATPSCharacter> OwnerCharacter);
 	virtual void StopFire();
 	virtual void Reloading();

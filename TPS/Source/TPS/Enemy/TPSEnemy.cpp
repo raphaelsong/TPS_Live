@@ -7,6 +7,8 @@
 #include "AI/EnemyAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
+#include "Components/WidgetComponent.h"
+#include "UI/TPSHpBarWidget.h"
 
 // Sets default values
 ATPSEnemy::ATPSEnemy()
@@ -29,6 +31,21 @@ ATPSEnemy::ATPSEnemy()
 		GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 		GetMesh()->SetRelativeScale3D(FVector(0.84f));
 	}
+
+	// HpBarWidgetComponent
+	HpBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBarWidget"));
+	HpBarWidgetComponent->SetupAttachment(GetMesh());
+	HpBarWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
+
+	static ConstructorHelpers::FClassFinder<UTPSHpBarWidget> HpBarWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
+	
+	if (HpBarWidgetClassRef.Succeeded())
+	{
+		HpBarWidgetComponent->SetWidgetClass(HpBarWidgetClassRef.Class);
+		HpBarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBarWidgetComponent->SetDrawSize(FVector2D(80.0f, 10.0f));
+		HpBarWidgetComponent->SetDrawAtDesiredSize(true);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +53,11 @@ void ATPSEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (HpBarWidgetComponent)
+	{
+		HpBarWidgetComponent->InitWidget();
+	}
+
 	SetHp(MaxHp);
 
 	UTPSEnemyAnimInstance* AnimInstance = Cast<UTPSEnemyAnimInstance>(GetMesh()->GetAnimInstance());
@@ -80,6 +102,15 @@ float ATPSEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 void ATPSEnemy::SetHp(float NewHp)
 {
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, MaxHp);
+
+	if (HpBarWidgetComponent)
+	{
+		UTPSHpBarWidget* HpBarWidget = Cast<UTPSHpBarWidget>(HpBarWidgetComponent->GetUserWidgetObject());
+		if (HpBarWidget)
+		{
+			HpBarWidget->UpdateHpBar(CurrentHp, MaxHp);
+		}
+	}
 }
 
 void ATPSEnemy::SetDamage()
@@ -106,6 +137,11 @@ void ATPSEnemy::SetDead()
 	}
 
 	SetActorEnableCollision(false);
+
+	if (HpBarWidgetComponent)
+	{
+		HpBarWidgetComponent->SetHiddenInGame(true);
+	}
 
 	FTimerHandle DeadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, 
