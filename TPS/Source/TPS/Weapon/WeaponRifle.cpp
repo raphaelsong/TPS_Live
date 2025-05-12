@@ -75,16 +75,16 @@ void AWeaponRifle::FireWithProjectile(TWeakObjectPtr<class ATPSCharacter> OwnerC
 		return;
 	}
 
-	FVector Start = WeaponMesh->GetSocketLocation("FireSocket");
-	FVector End = Start + Character->GetActorForwardVector();
-	FVector Direction = End - Start;
+	FTransform FireTransform = WeaponMesh->GetSocketTransform("FireSocket");
+	FVector Direction = FireTransform.GetRotation().GetForwardVector()* TraceDistance;
 
-	ABullet* SpawnBullet = GetWorld()->SpawnActor<ABullet>(Bullet);
+	FActorSpawnParameters SpawnParameter;
+	SpawnParameter.Owner = Character;
+	ABullet* SpawnBullet = GetWorld()->SpawnActor<ABullet>(Bullet, SpawnParameter);
 	if (SpawnBullet)
 	{
-		SpawnBullet->SetActorLocation(Start);
-		SpawnBullet->SetActorRotation(Direction.Rotation());
-		SpawnBullet->SetOwner(Character);
+		SpawnBullet->SetActorLocation(FireTransform.GetLocation());
+		SpawnBullet->SetActorRotation(FireTransform.GetRotation());
 		SpawnBullet->SetAttackDamage(AttackDamage);
 
 		if (Direction.Normalize())
@@ -118,8 +118,10 @@ void AWeaponRifle::FireWithLineTrace(TWeakObjectPtr<class ATPSCharacter> OwnerCh
 		return;
 	}
 
-	const FVector Start = WeaponMesh->GetSocketLocation("FireSocket");
-	const FVector End = Start + Character->GetActorForwardVector() * TraceDistance;
+	APlayerCameraManager* PlayerCameraManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+
+	const FVector Start = PlayerCameraManager->GetCameraLocation();
+	const FVector End = Start + PlayerCameraManager->GetActorForwardVector() * TraceDistance;
 
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;

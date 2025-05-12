@@ -259,8 +259,10 @@ void ATPSCharacter::Input_Move(const FInputActionValue& InputValue)
 
 void ATPSCharacter::Input_Turn(const FInputActionValue& InputValue)
 {
-	float XValue = InputValue.Get<float>();
-	AddControllerYawInput(XValue);
+	FVector2D LookVector = InputValue.Get<FVector2D>();
+
+	AddControllerYawInput(LookVector.X);
+	AddControllerPitchInput(LookVector.Y);
 }
 
 void ATPSCharacter::Input_Run(const FInputActionValue& InputValue)

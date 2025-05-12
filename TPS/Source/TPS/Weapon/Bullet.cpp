@@ -23,6 +23,7 @@ ABullet::ABullet()
 	StaticMeshComponent->SetupAttachment(GetRootComponent());
 	StaticMeshComponent->SetRelativeLocation(FVector(-5.0f, 0.0f, 0.0f));
 	StaticMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	StaticMeshComponent->SetRelativeScale3D(FVector(10.0f));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshRef(TEXT("/Script/Engine.StaticMesh'/Game/_Art/FPS_Weapon_Bundle/Weapons/Meshes/Ammunition/SM_Shell_40mm_G.SM_Shell_40mm_G'"));
 	if (MeshRef.Succeeded())
